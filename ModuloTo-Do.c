@@ -1,13 +1,3 @@
-/*Considere la siguiente situación: En la misma distribuidora del práctico anterior ahora surgió 
-la necesidad de llevar un control de las tareas realizadas por sus empleados. Usted forma 
-parte del equipo de programación que se encargará de hacer el módulo en cuestión que a 
-partir de ahora se llamará módulo To-Do: 
-Tareas 
-Cada empleado tiene un listado de tareas a realizar y debe indicar en el sistema si fueron 
-realizadas o no. Para ello deberá crear dos listas enlazadas: una para las tareas pendientes y 
-otra para las tareas realizadas. Cada vez que se marque una tarea como realizada deberá 
-mover la tarea de la lista de tareas pendientes a la lista de tareas realizadas. 
-Las estructuras de datos necesarias son las siguientes: */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -22,6 +12,7 @@ struct Nodo{
     Tarea T;  
     struct Nodo *Siguiente;  
 }typedef Nodo; 
+//Funcion que crea una tarea (el contenido del nodo)
 Tarea CrearTarea(int tareaID, char descripcion[], int duracion){
     Tarea nuevaTarea;
     nuevaTarea.TareaID=tareaID;
@@ -29,73 +20,130 @@ Tarea CrearTarea(int tareaID, char descripcion[], int duracion){
     nuevaTarea.Duracion=duracion;
     return nuevaTarea;
 }
+//Funcion que crea un nodo
 Nodo * CrearNodo(Tarea Tarea){
-    Nodo * nuevoNodo=malloc(sizeof(Nodo));
+    Nodo * nuevoNodo=(Nodo *) malloc(sizeof(Nodo));
     nuevoNodo->T=Tarea;
     nuevoNodo->Siguiente=NULL;
     return nuevoNodo;
 }
+//Funcion que crea una lista vacia
 Nodo * CrearLista(){
     return NULL;
 }
+//Funcion que inserta un nodo al comienzo de la lista
+void InsertarNodo(Nodo ** Start, Nodo *Nodo)
+{
+    Nodo->Siguiente = *Start;
+    *Start  = Nodo ;
+}
+//Funcion que permite mover un nodo de una lista a otra
+void TransferirTarea(Nodo **tareasRealizadas,Nodo **tareasPendientes,int ID){
+    Nodo * actual =*tareasPendientes;
+    Nodo * anterior=NULL;
+    while (actual->T.TareaID!=ID&&actual!=NULL)
+    {
+        anterior=actual;
+        actual=actual->Siguiente;
+    }
+    if (actual==NULL)
+    {
+        printf("No se encontro ninguna tarea bajo ese ID");
+        return;
+    }
+    if (anterior==NULL)
+    {
+        *tareasPendientes=actual->Siguiente;
+    }else
+    {
+        anterior->Siguiente=actual->Siguiente;
+    }
+    InsertarNodo(tareasRealizadas,actual);
+}
+//Funcion que devuelve la cantidad de nodos de una lista enlazada
+int longitud(Nodo *lista){
+    int cantidadDeNodos=0;
+    while (lista!=NULL)
+    {
+        cantidadDeNodos++;
+        lista=lista->Siguiente;
+    }
+    return cantidadDeNodos;
+}
+//Funcion permita listar todas las tareas pendientes y realizadas. 
+void MostrarLista(Nodo*Lista, int cantidadDeNodos){
+    Nodo* listarLista = Lista;
+    if (Lista==NULL)
+    {
+        printf("\n    Lista vacia");
+        return;
+    }
+    for (int i = 0; i < cantidadDeNodos; i++)
+    {
+        printf("\n    Tarea ID: %d\n",listarLista->T.TareaID);
+        printf("    Descripcion: %s\n",listarLista->T.Descripcion);
+        printf("    Duracion: %d[minutos]\n",listarLista->T.Duracion);
+        listarLista=listarLista->Siguiente;
+    }
+    }
+    
 int main(){
-    //1) Desarrolle una interfaz de carga de tareas para solicitar tareas pendientes, en la cual se 
-    //solicite descripción y duración de la misma (el id debe ser generado automáticamente por 
-    //el sistema, de manera autoincremental comenzando desde el número 1000). Al cabo de 
-    //cada tarea consulte al usuario si desea ingresar una nueva tarea o finalizar la carga. 
     int respuesta=1;
     int ID=1000;
     Nodo *tareasPendientes = CrearLista();
     Nodo *tareasRealizadas = CrearLista();
-    printf("Iniciando carga de la lista de tareas");
+    //Cargar la lista de tareas pendientes
+    printf("\nCargar lista de tareas pendientes\n\n");
     while (respuesta==1)
     {
-        printf("¿Desea agregar una nueva tarea o finalizar la carga? (0:No, 1:Si): ");
+        printf("    ¿Agregar nueva tarea? (1:Si, 0:No): ");
         scanf("%d",&respuesta);
         getchar();
         if (respuesta==1)
         {
             char descripcionDeLaTarea[1000];
             int duracionDeLaTarea;
-            printf("Ingrese por pantalla la descripción de la tarea: ");
+            
+            printf("    Tarea Nro %d[ID] -----------------------------\n",ID);
+            printf("    Ingrese una descripcion de la tarea: ");
             fgets(descripcionDeLaTarea,sizeof(descripcionDeLaTarea),stdin);
             descripcionDeLaTarea[strcspn(descripcionDeLaTarea,"\n")]=0;
-            getchar();
-            printf("Ingrese por pantalla la duracion de la tarea (minutos): ");
+            printf("    Ingrese la duracion de la tarea (en minutos): ");
             scanf("%d",&duracionDeLaTarea);
             getchar();
             Tarea tareaPendiente =CrearTarea(ID,descripcionDeLaTarea,duracionDeLaTarea);
             Nodo *nuevoNodo = CrearNodo(tareaPendiente);
             nuevoNodo->Siguiente = tareasPendientes;
             tareasPendientes = nuevoNodo;
-            printf("Tarea agregada a la lista");
+            printf("    ¡Tarea agregada a la lista!\n\n");
 
-        }else
-        {
-            printf("Finalizando carga de la lista de tareas...");
         }
         ID++;
     }
-
-    //2) Implemente una interfaz para elegir qué tareas de la lista de pendientes deben ser 
-    //transferidas a la lista de tareas realizadas.  
+    //Elegir que tareas de la lista de pendientes se van pasar a la lista de tareas realizadas.  
     respuesta=1;
-    printf("Iniciando transferencia de tareas pendientes a la lista de tareas realizadas");
+    printf("\nTransferir tareas pendientes a la lista de tareas realizadas\n");
     while (respuesta==1)
     {
-        printf("¿Desea transferir una tarea pendiente a la lista de tareas realizadas? (0:No, 1:Si): ");
+        printf("\n    ¿Desea transferir una tarea pendiente a la lista de tareas realizadas? (1:Si,0:No): ");
         scanf("%d",&respuesta);
         getchar();
         if (respuesta==1)
         {   
-            printf("Lista actual de tareas pendientes: ");
-
-        }else
-        {
-            
+            int IDdeTareaATransferir;
+            printf("    Ingrese el ID de la tarea a transferir: ");
+            scanf("%d",&IDdeTareaATransferir);
+            getchar();
+            TransferirTarea(&tareasRealizadas,&tareasPendientes,IDdeTareaATransferir);
         }
     }
-    printf("Finalizando transferencia de la lista de tareas pendientes a la lista de tareas realizadas");
+    //Mostrar por pantalla las listas de tareas pendientes y realizadas
+    printf("\nLISTA de tareas PENDIENTES:\n");
+    int cantidadDeTareasPendientes=longitud(tareasPendientes);
+    MostrarLista(tareasPendientes,cantidadDeTareasPendientes);
+    printf("\nLISTA de tareas REALIZADAS:\n");
+    int cantidadDeTareasRealizadas=longitud(tareasRealizadas);
+    MostrarLista(tareasRealizadas,cantidadDeTareasRealizadas);
 
     return 0;
 }
@@ -104,7 +152,6 @@ int main(){
 
 
 
-//3) Implemente una funcionalidad que permita listar todas las tareas pendientes y realizadas. 
 
 //4) Implemente una funcionalidad que permita consultar tareas por id o palabra clave y 
 //mostrarlas por pantalla, indicando si corresponde a una tarea pendiente o realizada.
