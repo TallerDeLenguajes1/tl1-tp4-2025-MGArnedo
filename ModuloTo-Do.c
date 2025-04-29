@@ -87,6 +87,7 @@ void MostrarLista(Nodo*Lista, int cantidadDeNodos){
     }
     }
 //Funcion que permite buscar una tarea por ID o palabra clave
+
 void ConsultarTareas(Nodo* tareasPendientes, Nodo* tareasRealizadas) {
     int opcion;
     printf("Ingrese '0' para buscar por ID, ingrese '1' para buscar por palabra clave: ");
@@ -219,11 +220,3 @@ int main(){
 
     return 0;
 }
-
-
-
-
-
-
-//4) Implemente una funcionalidad que permita consultar tareas por id o palabra clave y 
-//mostrarlas por pantalla, indicando si corresponde a una tarea pendiente o realizada.
